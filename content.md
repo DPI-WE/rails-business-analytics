@@ -1,23 +1,41 @@
-# Replace with lesson title
 
-Add your content here!
+[Lecture Video](https://youtu.be/GBTeAbqeC14)
 
-[Read up here for full instructions with examples for lesson writing.](https://learn.firstdraft.com/lessons/3-how-to-write-a-lesson)
+As part of the product development lifecycle you'll want to collect and visualize data to help you make informed decisions.
+For business analytics I recommend checking out the [blazer gem](https://github.com/ankane/blazer). It allows you to create reports using SQL queries and is already integrated with [chartkick](https://github.com/ankane/chartkick) to visualize the data.
 
-## Heading 1
-
-Use `##` second or greater level headings (HTML `<h2>` and greater).
-
-### Heading 1.1
-
-Reference images from the `assets/` folder like so:
-
+```ruby
+# make sure you authorize who can access the blazer dashboard!
+authenticate :user, ->(user) { user.admin? } do
+  mount Blazer::Engine, at: "blazer"
+end
 ```
-![](assets/example-image.png)
-```
+For collecting analytics like page views and visits you might want to use something like the [ahoy gem](https://github.com/ankane/ahoy). This way you can have a better understanding of who is visiting your site and which pages they are visiting.
 
-You can use the path `/assets/my-image.png` or `assets/my-image.png`, both will render in your local markdown preview; and when you connect the repository with a Learn Lesson, the assets will upload to Cloudinary and the paths will automatically be converted to a hosted URL, e.g.:
+You may also want to track more user data (eg sign_in_count, last_sign_in_at, current_sign_in_ip, etc) using [Devise Trackable module](https://github.com/heartcombo/devise).
 
-```
-![](https://res.cloudinary.com/[CLOUD_NAME]/image/upload/[IMAGE_VERSION]/appdev-lessons/[REPO_NAME]/[BRANCH]/[IMAGE_NAME])
+Here are some helpful queries to get you started with blazer and ahoy.
+```sql
+-- Daily Visitors
+SELECT date(started_at) AS date, count(DISTINCT visitor_token) AS unique_visitors
+FROM ahoy_visits
+GROUP BY date
+ORDER BY date DESC
+
+-- Source of Traffic
+SELECT referring_domain, count(DISTINCT visitor_token) AS unique_visitors
+FROM ahoy_visits
+WHERE referring_domain IS NOT NULL
+GROUP BY referring_domain
+ORDER BY count(DISTINCT visitor_token) DESC;
+
+-- Favorite pages by visits (and optional time constraint)
+SELECT properties, COUNT(*) AS visit_count
+FROM ahoy_events
+where name = 'Ran action'
+GROUP BY properties
+ORDER BY visit_count DESC;
+
+-- add time constraint where clause
+time >= NOW() - INTERVAL '24 hours'
 ```
