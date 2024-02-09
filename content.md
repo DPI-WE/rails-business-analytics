@@ -1,3 +1,4 @@
+# Business Insights and Analytics🕴️ 
 
 [Lecture Video](https://youtu.be/GBTeAbqeC14)
 
